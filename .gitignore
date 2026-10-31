@@ -1,0 +1,15 @@
+# OS가 만드는 잡파일
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 옵시디언 설정·휴지통
+.obsidian/
+.trash/
+
+# 위키 사이트 개발용 (올리지 않음)
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
