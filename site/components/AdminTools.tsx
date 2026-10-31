@@ -4,12 +4,30 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 type Pick = { text: string; note: string; x: number; y: number }
 type Phase = 'idle' | 'generating' | 'ready' | 'saving' | 'saved' | 'error'
+type Kind = 'auto' | '개념' | '질문'
 
-/** 노트 본문에서 글자를 드래그하면 질문 노트 초안을 만들고, 확인 후 레포에 커밋한다 (개발자 전용). */
+/** 초안 프론트매터를 보고 어디에 저장될지 미리 보여준다 */
+function target(draft: string) {
+  const fm = /^---\n([\s\S]*?)\n---/.exec(draft.trim())?.[1] ?? ''
+  const type = /^type:\s*(\S+)/m.exec(fm)?.[1]
+  const title = (/^#\s+(.+)$/m.exec(draft)?.[1] ?? '').trim()
+  if (type === '개념') {
+    const cat = /^category:\s*"?\[\[([^\]|]+)/m.exec(fm)?.[1] ?? '?'
+    return { type, path: `개념/${cat}/${title || '?'}.md` }
+  }
+  if (type === '질문') {
+    const date = /^created:\s*(\S+)/m.exec(fm)?.[1] ?? '날짜'
+    return { type, path: `질문/${date} ${title || '?'}.md` }
+  }
+  return null
+}
+
+/** 노트 본문에서 글자를 드래그하면 개념·질문 노트 초안을 만들고, 확인 후 레포에 커밋한다 (개발자 전용). */
 export default function AdminTools() {
   const [pick, setPick] = useState<Pick | null>(null)
   const [open, setOpen] = useState<Pick | null>(null)
   const [question, setQuestion] = useState('')
+  const [kind, setKind] = useState<Kind>('auto')
   const [draft, setDraft] = useState('')
   const [phase, setPhase] = useState<Phase>('idle')
   const [message, setMessage] = useState('')
@@ -37,7 +55,7 @@ export default function AdminTools() {
     }
   }, [])
 
-  const generate = useCallback(async (target: Pick, extra: string) => {
+  const generate = useCallback(async (picked: Pick, extra: string, k: Kind) => {
     abortRef.current?.abort()
     const ac = new AbortController()
     abortRef.current = ac
@@ -48,7 +66,7 @@ export default function AdminTools() {
       const r = await fetch('/api/admin/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selection: target.text, note: target.note, question: extra }),
+        body: JSON.stringify({ selection: picked.text, note: picked.note, question: extra, kind: k }),
         signal: ac.signal,
       })
       if (!r.ok || !r.body) {
@@ -86,7 +104,7 @@ export default function AdminTools() {
       if (!r.ok) throw new Error(j.error ?? `저장 실패 (${r.status})`)
       setPhase('saved')
       setMessage(
-        `저장했어요: ${j.path}\n옵시디언에서 Sync를 눌러 받아오세요. 사이트에는 Vercel 재배포가 끝나면(1~2분) 보여요.`,
+        `${j.kind} 노트로 저장했어요: ${j.path}\n옵시디언에서 Sync를 눌러 받아오세요. 사이트에는 Vercel 재배포가 끝나면(1~2분) 보여요.`,
       )
     } catch (e) {
       setPhase('ready')
@@ -100,6 +118,7 @@ export default function AdminTools() {
     setPhase('idle')
     setDraft('')
     setQuestion('')
+    setKind('auto')
     setMessage('')
   }
 
@@ -115,14 +134,14 @@ export default function AdminTools() {
             setPick(null)
           }}
         >
-          질문 노트 만들기
+          노트 만들기
         </button>
       )}
 
       {open && (
-        <aside className="admin-panel" aria-label="질문 노트 만들기">
+        <aside className="admin-panel" aria-label="노트 만들기">
           <p>
-            <b>질문 노트 만들기</b> <small>(개발자 전용)</small>{' '}
+            <b>노트 만들기</b> <small>(개발자 전용)</small>{' '}
             <button onClick={close} style={{ float: 'right' }}>
               닫기
             </button>
@@ -132,12 +151,21 @@ export default function AdminTools() {
             <br />
             드래그한 글자: <mark>{open.text}</mark>
           </p>
+          <p className="admin-kind">
+            종류:{' '}
+            {(['auto', '개념', '질문'] as Kind[]).map((k) => (
+              <label key={k}>
+                <input type="radio" name="kind" checked={kind === k} onChange={() => setKind(k)} />{' '}
+                {k === 'auto' ? '자동 (개념이면 개념 노트)' : `${k} 노트`}
+              </label>
+            ))}
+          </p>
           <label>
             추가로 묻고 싶은 것 (선택)
             <textarea rows={2} value={question} onChange={(e) => setQuestion(e.target.value)} />
           </label>
           <p>
-            <button onClick={() => generate(open, question)} disabled={phase === 'generating' || phase === 'saving'}>
+            <button onClick={() => generate(open, question, kind)} disabled={phase === 'generating' || phase === 'saving'}>
               {draft ? '다시 만들기' : '초안 만들기'}
             </button>{' '}
             {phase === 'generating' && <span className="muted">Claude가 쓰는 중…</span>}
@@ -156,8 +184,18 @@ export default function AdminTools() {
           )}
           {(phase === 'ready' || phase === 'saving') && (
             <p>
-              <button onClick={save} disabled={phase === 'saving'}>
-                {phase === 'saving' ? '저장 중…' : '레포 질문/ 폴더에 저장'}
+              {target(draft) ? (
+                <>
+                  <span className="muted">
+                    {target(draft)!.type} 노트 → {target(draft)!.path}
+                  </span>
+                  <br />
+                </>
+              ) : (
+                <span className="admin-err">프론트매터 type을 읽을 수 없어요.</span>
+              )}
+              <button onClick={save} disabled={phase === 'saving' || !target(draft)}>
+                {phase === 'saving' ? '저장 중…' : '레포에 저장'}
               </button>
             </p>
           )}
