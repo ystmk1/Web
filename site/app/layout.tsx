@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Sidebar from '@/components/Sidebar'
 import AdminLoader from '@/components/AdminLoader'
 import { sidebarData } from '@/lib/data'
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css'
 import './globals.css'
 
 export const metadata: Metadata = {

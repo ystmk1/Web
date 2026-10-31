@@ -3,7 +3,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   font-size: 16px;
   line-height: 1.65;
   color: #202122;
@@ -32,6 +32,7 @@ a[aria-current='page'] { color: #202122; font-weight: bold; text-decoration: non
 .site-title { margin: 0 0 10px; font-weight: bold; font-size: 16px; }
 .site-title a { color: #202122; text-decoration: none; }
 .side-search input { width: 100%; padding: 4px 6px; font: inherit; }
+input, textarea, button { font-family: inherit; }
 .side-links, .sidebar ul { list-style: none; padding: 0; margin: 8px 0; }
 .sidebar details ul { padding-left: 14px; margin: 2px 0 6px; }
 .sidebar li { margin: 2px 0; }
@@ -44,8 +45,8 @@ a[aria-current='page'] { color: #202122; font-weight: bold; text-decoration: non
 .crumbs { font-size: 13px; color: #54595d; margin-bottom: 4px; }
 .meta { font-size: 13px; color: #54595d; border: 1px solid #eaecf0; background: #f8f9fa; padding: 6px 10px; margin: 8px 0 16px; }
 .meta span + span::before { content: ' · '; }
-.note h1 { font-size: 28px; font-weight: normal; font-family: Georgia, 'Nanum Myeongjo', serif; border-bottom: 1px solid #a2a9b1; margin: 0 0 12px; }
-.note h2 { font-size: 21px; font-weight: normal; border-bottom: 1px solid #a2a9b1; margin: 28px 0 8px; }
+.note h1 { font-size: 28px; font-weight: 600; border-bottom: 1px solid #a2a9b1; margin: 0 0 12px; }
+.note h2 { font-size: 21px; font-weight: 600; border-bottom: 1px solid #a2a9b1; margin: 28px 0 8px; }
 .note h3 { font-size: 17px; margin: 20px 0 6px; }
 .note blockquote { margin: 12px 0; padding: 4px 14px; border-left: 4px solid #c8ccd1; background: #f8f9fa; }
 .note table { border-collapse: collapse; margin: 12px 0; font-size: 14px; display: block; overflow-x: auto; }
