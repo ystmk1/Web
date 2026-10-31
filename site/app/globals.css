@@ -55,9 +55,6 @@ a[aria-current='page'] { color: #202122; font-weight: bold; text-decoration: non
 .note code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; background: #f8f9fa; padding: 0 3px; }
 .note pre code { background: none; padding: 0; }
 
-/* 레포 밖 노트를 가리키는 링크: 깨진 링크처럼 보이지 않게 일반 글자로 */
-.missing { color: inherit; }
-.missing::after { content: ' (준비 중)'; font-size: 0.75em; color: #72777d; }
 
 .section { margin-top: 36px; border-top: 1px solid #a2a9b1; padding-top: 4px; }
 .section h2 { font-size: 17px; margin: 8px 0; }

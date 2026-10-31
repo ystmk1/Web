@@ -99,7 +99,7 @@ const WIKILINK = /\[\[([^\[\]\n]+?)\]\]/g
 const missing = new Map() // 이름 → 가리키는 노트 목록
 
 // 위키링크를 일반 마크다운 링크로 바꾼다. 코드 블록과 인라인 코드 안은 건드리지 않는다.
-// 없는 노트는 missing: 주소로 두었다가 아래 rehype 단계에서 <span>으로 바꾼다.
+// 없는 노트(레포 밖 노트)는 링크 없이 일반 글자로 둔다.
 const TOKEN = /(`+)[^`]*?\1|\[\[([^\[\]\n]+?)\]\]/g
 function convertWikilinks(md, ctx) {
   let fence = null
@@ -127,7 +127,7 @@ function convertWikilinks(md, ctx) {
         }
         if (!missing.has(target)) missing.set(target, new Set())
         missing.get(target).add(ctx.self)
-        return `[${text}](missing:${encodeURIComponent(target)})`
+        return text
       })
     })
     .join('\n')
@@ -138,10 +138,7 @@ function rehypeWikilinkClasses() {
     visit(tree, 'element', (node) => {
       if (node.tagName !== 'a') return
       const href = String(node.properties?.href || '')
-      if (href.startsWith('missing:')) {
-        node.tagName = 'span'
-        node.properties = { className: ['missing'], title: '준비 중인 노트' }
-      } else if (href.startsWith('/w/')) {
+      if (href.startsWith('/w/')) {
         node.properties.className = ['wikilink']
       }
     })
@@ -247,6 +244,6 @@ const result = {
 fs.mkdirSync(path.dirname(OUT), { recursive: true })
 fs.writeFileSync(OUT, JSON.stringify(result))
 console.log(
-  `[index] 노트 ${notes.length}개, 카테고리 ${categories.length}개, 질문 ${questions.length}개, 준비 중 링크 ${missing.size}종` +
+  `[index] 노트 ${notes.length}개, 카테고리 ${categories.length}개, 질문 ${questions.length}개, 링크 없는 노트 이름 ${missing.size}종` +
     (aliasConflicts.length ? `\n[index] 별칭 충돌: ${aliasConflicts.join(', ')}` : ''),
 )

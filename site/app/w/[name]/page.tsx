@@ -32,9 +32,7 @@ function NameLink({ name }: { name: string }) {
   return getNote(name) ? (
     <Link href={href(name)}>{getNote(name)!.title}</Link>
   ) : (
-    <span className="missing" title="준비 중인 노트">
-      {name}
-    </span>
+    <>{name}</>
   )
 }
 
