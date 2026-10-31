@@ -79,6 +79,7 @@ input, textarea, button { font-family: inherit; }
   box-shadow: 0 2px 10px rgba(0,0,0,.15);
 }
 .admin-panel label { display: block; margin: 8px 0; }
+.admin-panel .admin-kind label { display: inline-block; margin: 0 10px 0 0; }
 .admin-panel textarea { display: block; width: 100%; font: 13px/1.5 ui-monospace, Consolas, monospace; margin-top: 4px; }
 .admin-ok { color: #14866d; white-space: pre-line; }
 .admin-err { color: #d33; white-space: pre-line; }

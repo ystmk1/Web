@@ -38,7 +38,7 @@ export default function AdminPage() {
       {admin === null && <p className="muted">확인 중…</p>}
       {admin === true && (
         <>
-          <p>로그인되어 있어요. 노트 본문에서 글자를 드래그하면 &apos;질문 노트 만들기&apos; 버튼이 나와요.</p>
+          <p>로그인되어 있어요. 노트 본문에서 글자를 드래그하면 &apos;노트 만들기&apos; 버튼이 나와요.</p>
           <button onClick={logout}>로그아웃</button>
         </>
       )}
