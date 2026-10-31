@@ -91,7 +91,8 @@ created: {{TODAY}}
   나쁜 예: "저장 안 하면 화면에 반영 안 된다 — 아직 메모리에만 있어서"
   좋은 예: "저장을 안 하면 아직 메모리에만 있기 때문에 화면에 반영되지 않는다"
 - 문장은 "~다" 체. 비유는 일상적인 것(식당, 택배, 도서관 등)으로.
-- 틀린 내용이 없어야 한다. 확실하지 않으면 단정하지 않는다.`
+- 틀린 내용이 없어야 한다. 확실하지 않으면 단정하지 않는다.
+- 길이는 기존 노트와 비슷하게: 본문 1,500~3,000자. 같은 말을 되풀이하지 않는다.`
 
 const KIND_RULE: Record<NoteKind, string> = {
   auto: '- 위 기준으로 개념 노트와 질문 노트 중 하나를 고른다.',
@@ -99,14 +100,13 @@ const KIND_RULE: Record<NoteKind, string> = {
   질문: '- 사용자가 질문 노트를 골랐다. 반드시 질문 노트로 쓴다.',
 }
 
+/** 링크·중복 확인용 노트 목록. 토큰을 아끼려고 짧게 쓴다 (카테고리는 system에 따로 있음). */
 function noteCatalog() {
-  return data.notes
-    .filter((n) => n.type === '개념' || n.type === '카테고리' || n.type === '질문')
-    .map((n) => {
-      const extra = n.aliases.length ? ` (별칭: ${n.aliases.slice(0, 8).join(', ')})` : ''
-      return `- ${n.name} [${n.type}${n.category ? `, ${n.category}` : ''}]${extra}`
-    })
-    .join('\n')
+  const concepts = data.notes
+    .filter((n) => n.type === '개념')
+    .map((n) => `- ${n.name}${n.aliases.length ? ` (${n.aliases.slice(0, 4).join(', ')})` : ''}`)
+  const questions = data.notes.filter((n) => n.type === '질문').map((n) => `- ${n.name}`)
+  return `### 개념\n${concepts.join('\n')}\n\n### 질문\n${questions.join('\n')}`
 }
 
 const yamlList = (xs: string[]) => `[${xs.join(', ')}]`
@@ -136,15 +136,23 @@ function example(names: string[], type: string) {
   return n ? withFrontmatter(n) : ''
 }
 
+const SOURCE_LIMIT = 6000
+
+/**
+ * 프롬프트를 '캐시되는 앞부분'과 '매번 바뀌는 뒷부분'으로 나눈다.
+ * - system: 양식·규칙 (종류 선택에 따라 한 줄만 다름)
+ * - stable: 노트 목록 + 예시 노트 (배포가 바뀌기 전까지 같음) → 캐시
+ * - dynamic: 드래그한 곳의 노트, 드래그한 글자, 추가 질문
+ */
 export function buildPrompt(input: { selection: string; note: string; question?: string; kind?: NoteKind }) {
   const today = todaySeoul()
   const kind: NoteKind = input.kind && input.kind in KIND_RULE ? input.kind : 'auto'
   const source = getNote(input.note)
-  const system = COMMON.replace('{{KIND_RULE}}', KIND_RULE[kind])
-    .replace('{{CATEGORIES}}', categoryTags().map((c) => `  - ${c.name} (태그: ${c.tag})`).join('\n'))
+  const system = COMMON.replace('{{CATEGORIES}}', categoryTags().map((c) => `  - ${c.name} (태그: ${c.tag})`).join('\n'))
     .replaceAll('{{TODAY}}', today)
+    .replace('{{KIND_RULE}}', '- 종류 규칙은 맨 마지막 메시지의 "종류" 줄을 따른다.')
 
-  const user = `## 있는 노트
+  const stable = `## 있는 노트
 ${noteCatalog()}
 
 ## 기존 개념 노트 예시 (양식과 문체를 이대로 따른다)
@@ -155,17 +163,21 @@ ${example(['서버', '클라이언트'], '개념')}
 ## 기존 질문 노트 예시 (양식과 문체를 이대로 따른다)
 <example>
 ${example(['2026-10-31 클라이언트와 서버 차이'], '질문')}
-</example>
+</example>`
 
-## 드래그한 곳
+  const src = source?.markdown.trim() ?? '(없음)'
+  const dynamic = `## 드래그한 곳
 노트: ${input.note}${source ? ` (${source.type ?? '노트'})` : ''}
 <source_note>
-${source?.markdown.trim() ?? '(없음)'}
+${src.length > SOURCE_LIMIT ? src.slice(0, SOURCE_LIMIT) + '\n…(뒷부분 생략)' : src}
 </source_note>
 
 ## 드래그한 글자
 ${input.selection.trim()}
 ${input.question?.trim() ? `\n## 추가로 묻고 싶은 것\n${input.question.trim()}\n` : ''}
+## 종류
+${KIND_RULE[kind]}
+
 새 노트 파일 내용을 출력해.`
-  return { system, user, today }
+  return { system, stable, dynamic, today }
 }
