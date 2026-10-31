@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { costUSD, TIER_LABEL, USAGE_MARK, type Tier, type Usage } from '@/lib/usage'
 
 type Pick = { text: string; note: string; x: number; y: number }
 type Phase = 'idle' | 'generating' | 'ready' | 'saving' | 'saved' | 'error'
@@ -28,6 +29,23 @@ export default function AdminTools() {
   const [open, setOpen] = useState<Pick | null>(null)
   const [question, setQuestion] = useState('')
   const [kind, setKind] = useState<Kind>('auto')
+  const [tier, setTier] = useState<Tier>('haiku')
+  const [usage, setUsage] = useState<Usage | null>(null)
+  const [total, setTotal] = useState(0)
+
+  // 고른 모델은 이 브라우저에 기억한다
+  useEffect(() => {
+    try {
+      const t = localStorage.getItem('ww-model') as Tier | null
+      if (t && t in TIER_LABEL) setTier(t)
+    } catch {}
+  }, [])
+  const pickTier = (t: Tier) => {
+    setTier(t)
+    try {
+      localStorage.setItem('ww-model', t)
+    } catch {}
+  }
   const [draft, setDraft] = useState('')
   const [phase, setPhase] = useState<Phase>('idle')
   const [message, setMessage] = useState('')
@@ -55,18 +73,19 @@ export default function AdminTools() {
     }
   }, [])
 
-  const generate = useCallback(async (picked: Pick, extra: string, k: Kind) => {
+  const generate = useCallback(async (picked: Pick, extra: string, k: Kind, model: Tier) => {
     abortRef.current?.abort()
     const ac = new AbortController()
     abortRef.current = ac
     setDraft('')
     setMessage('')
+    setUsage(null)
     setPhase('generating')
     try {
       const r = await fetch('/api/admin/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ selection: picked.text, note: picked.note, question: extra, kind: k }),
+        body: JSON.stringify({ selection: picked.text, note: picked.note, question: extra, kind: k, model }),
         signal: ac.signal,
       })
       if (!r.ok || !r.body) {
@@ -80,9 +99,18 @@ export default function AdminTools() {
         const { done, value } = await reader.read()
         if (done) break
         acc += dec.decode(value, { stream: true })
-        setDraft(acc)
+        setDraft(acc.split(USAGE_MARK)[0])
       }
-      if (acc.includes('[생성 중 오류:')) throw new Error('생성이 중간에 끊겼어요. 다시 만들어 주세요.')
+      const [text, meta] = acc.split(USAGE_MARK)
+      setDraft(text)
+      if (meta) {
+        try {
+          const u = JSON.parse(meta) as Usage
+          setUsage(u)
+          setTotal((t) => t + costUSD(u))
+        } catch {}
+      }
+      if (text.includes('[생성 중 오류:')) throw new Error('생성이 중간에 끊겼어요. 다시 만들어 주세요.')
       setPhase('ready')
     } catch (e) {
       if ((e as Error).name === 'AbortError') return
@@ -160,12 +188,20 @@ export default function AdminTools() {
               </label>
             ))}
           </p>
+          <p className="admin-kind">
+            모델:{' '}
+            {(Object.keys(TIER_LABEL) as Tier[]).map((t) => (
+              <label key={t}>
+                <input type="radio" name="tier" checked={tier === t} onChange={() => pickTier(t)} /> {TIER_LABEL[t]}
+              </label>
+            ))}
+          </p>
           <label>
             추가로 묻고 싶은 것 (선택)
             <textarea rows={2} value={question} onChange={(e) => setQuestion(e.target.value)} />
           </label>
           <p>
-            <button onClick={() => generate(open, question, kind)} disabled={phase === 'generating' || phase === 'saving'}>
+            <button onClick={() => generate(open, question, kind, tier)} disabled={phase === 'generating' || phase === 'saving'}>
               {draft ? '다시 만들기' : '초안 만들기'}
             </button>{' '}
             {phase === 'generating' && <span className="muted">Claude가 쓰는 중…</span>}
@@ -181,6 +217,14 @@ export default function AdminTools() {
                 spellCheck={false}
               />
             </label>
+          )}
+          {usage && (
+            <p className="muted" style={{ fontSize: 12 }}>
+              {usage.model} · 입력 {usage.input + usage.cacheWrite + usage.cacheRead} 토큰 (캐시 읽음 {usage.cacheRead}) · 출력{' '}
+              {usage.output} 토큰 · 약 ${costUSD(usage).toFixed(4)}
+              {total > costUSD(usage) && ` · 이번 접속 합계 약 $${total.toFixed(4)}`}
+              {usage.cut && <span className="admin-err"> · 길이 제한에 걸려 끝이 잘렸어요</span>}
+            </p>
           )}
           {(phase === 'ready' || phase === 'saving') && (
             <p>
