@@ -4,7 +4,7 @@ category: "[[프론트엔드]]"
 aliases: [CSS, Cascading Style Sheets, 씨에스에스, 스타일시트]
 tags: [web-workshop, 개념, 프론트엔드]
 created: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-02
 ---
 
 # CSS
@@ -45,3 +45,4 @@ h1 {
 
 ## 나온 질문
 - [[2026-10-31 프론트엔드의 HTML·CSS·JavaScript 역할]]
+- [[2026-11-02 CSS Zen Garden]]
