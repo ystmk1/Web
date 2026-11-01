@@ -4,7 +4,7 @@ category: "[[개발 환경]]"
 aliases: [패스, 환경 변수 PATH, Path]
 tags: [web-workshop, 개념, 개발환경]
 created: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-01
 ---
 
 # PATH
@@ -34,3 +34,4 @@ updated: 2026-10-31
 
 ## 나온 질문
 - [[2026-10-31 웹 입문자에게 OS 지식이 필요한 이유]]
+- [[2026-11-01 npm run dev가 하는 일]]

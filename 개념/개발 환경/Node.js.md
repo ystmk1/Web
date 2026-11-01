@@ -4,7 +4,7 @@ category: "[[개발 환경]]"
 aliases: [노드, 노드JS, 노드제이에스, Node, NodeJS]
 tags: [web-workshop, 개념, 개발환경]
 created: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-01
 ---
 
 # Node.js
@@ -35,7 +35,7 @@ updated: 2026-10-31
 - **설치했는데 `node` 명령어가 안 먹힐 수 있다.** 이때는 [[운영체제]]가 node 프로그램의 위치를 모르는 경우가 많다 → [[PATH]]
 
 ## 웹 개발에서는
-- `npm run dev`를 하면 Node.js가 개발 서버를 켠다. 그래서 브라우저에서 `localhost:3000`처럼 [[localhost]]와 [[포트]] 번호로 내 사이트를 볼 수 있다.
+- `npm run dev`를 하면 Node.js가 [[개발 서버]]를 켠다. 그래서 브라우저에서 `localhost:3000`처럼 [[localhost]]와 [[포트]] 번호로 내 사이트를 볼 수 있다.
 - React, Next.js, Vite 같은 프론트엔드 도구도 개발할 때는 Node.js 위에서 돌아간다. 그래서 프론트엔드만 만들어도 Node.js를 설치해야 하는 경우가 많다.
 - 백엔드 서버를 JavaScript로 만들 때도 Node.js를 쓴다. 이 경우 프론트엔드와 백엔드를 같은 언어로 만들 수 있다.
 - Node.js 코드는 `process.env`로 [[환경 변수]]를 읽는다. API 키 같은 비밀 값은 이렇게 코드 바깥에서 건넨다.
@@ -49,5 +49,7 @@ updated: 2026-10-31
 - [[환경 변수]]: Node.js 코드가 읽는 바깥 설정값
 - [[localhost]]: Node.js 개발 서버가 열리는 내 컴퓨터 주소
 - [[빌드]]: Node.js로 실행하는 배포 준비 과정
+- [[개발 서버]]: Node.js로 실행되는 개발용 서버
 
 ## 나온 질문
+- [[2026-11-01 npm run dev가 하는 일]]
