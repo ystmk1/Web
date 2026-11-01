@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { costUSD, TIER_LABEL, USAGE_MARK, type Tier, type Usage } from '@/lib/usage'
+import { costUSD, TIER_LABEL, USAGE_MARK, USAGE_MARK_LEGACY, type Tier, type Usage } from '@/lib/usage'
 
 type Pick = { text: string; note: string; x: number; y: number }
 type Phase = 'idle' | 'generating' | 'ready' | 'saving' | 'saved' | 'error'
@@ -99,9 +99,10 @@ export default function AdminTools() {
         const { done, value } = await reader.read()
         if (done) break
         acc += dec.decode(value, { stream: true })
-        setDraft(acc.split(USAGE_MARK)[0])
+        setDraft(acc.split(USAGE_MARK)[0].split(USAGE_MARK_LEGACY)[0])
       }
-      const [text, meta] = acc.split(USAGE_MARK)
+      const hasLegacy = acc.includes(USAGE_MARK_LEGACY)
+      const [text, meta] = acc.split(hasLegacy ? USAGE_MARK_LEGACY : USAGE_MARK)
       setDraft(text)
       if (meta) {
         try {
