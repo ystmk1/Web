@@ -4,7 +4,7 @@ category: "[[프론트엔드]]"
 aliases: [HyperText Markup Language, 에이치티엠엘, 하이퍼텍스트 마크업 랭귀지]
 tags: [web-workshop, 개념, 프론트엔드]
 created: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-02
 ---
 
 # HTML
@@ -43,3 +43,4 @@ updated: 2026-10-31
 
 ## 나온 질문
 - [[2026-10-31 유튜브 로고에 img가 없는 이유]]
+- [[2026-11-02 html lang 속성을 지정하는 이유]]
