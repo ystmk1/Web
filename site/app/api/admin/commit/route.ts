@@ -3,6 +3,7 @@ import { isAdmin, unauthorized } from '@/lib/auth'
 import { data, getNote } from '@/lib/data'
 import { createFile, fileExists } from '@/lib/github'
 import { todaySeoul } from '@/lib/prompt'
+import { USAGE_MARK, USAGE_MARK_LEGACY } from '@/lib/usage'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +22,18 @@ function existing(name: string) {
   return data.aliasIndex[name.normalize('NFC').toLowerCase()] ?? null
 }
 
+// /api/admin/ask 가 스트림 맨 끝에 붙이는 사용량 표시. 클라이언트가 떼어내지만,
+// 한 번 끝에 안 지워진 채 저장된 적이 있어서(엣지망에서 NUL 바이트가 사라진 사고)
+// 커밋 직전에도 한 번 더 지운다. 마커가 없어도, 그 모양(USAGE{"model":...})만
+// 남아 있어도 지운다.
+function stripUsageTail(s: string) {
+  for (const mark of [USAGE_MARK, USAGE_MARK_LEGACY]) {
+    const i = s.indexOf(mark)
+    if (i >= 0) return s.slice(0, i).trimEnd()
+  }
+  return s.replace(/\s*USAGE\{"model":[\s\S]*$/, '').trimEnd()
+}
+
 /**
  * 확인한 노트를 레포에 새 파일로 커밋한다. 기존 노트는 건드리지 않는다.
  * - 개념 노트 → 개념/<카테고리>/<개념 이름>.md
@@ -30,10 +43,12 @@ export async function POST(req: Request) {
   if (!(await isAdmin())) return unauthorized()
   const body = await req.json().catch(() => ({}))
   // 모델이 코드 펜스로 감쌌으면 벗긴다
-  const markdown = String(body.markdown ?? '')
-    .trim()
-    .replace(/^```[a-z]*\n([\s\S]*?)\n```$/i, '$1')
-    .trim()
+  const markdown = stripUsageTail(
+    String(body.markdown ?? '')
+      .trim()
+      .replace(/^```[a-z]*\n([\s\S]*?)\n```$/i, '$1')
+      .trim(),
+  )
 
   let parsed
   try {
