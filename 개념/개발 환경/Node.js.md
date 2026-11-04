@@ -4,7 +4,7 @@ category: "[[개발 환경]]"
 aliases: [노드, 노드JS, 노드제이에스, Node, NodeJS]
 tags: [web-workshop, 개념, 개발환경]
 created: 2026-10-31
-updated: 2026-11-01
+updated: 2026-11-04
 ---
 
 # Node.js
@@ -16,6 +16,7 @@ updated: 2026-11-01
 - Node.js는 크롬의 JavaScript 엔진(V8)을 브라우저 밖으로 꺼내서 따로 실행할 수 있게 만든 [[프로그램]]이다.
 - 그래서 Node.js를 설치하면 터미널에서 `node 파일이름.js`로 JavaScript 파일을 바로 실행할 수 있다.
 - Node.js를 설치하면 npm이라는 패키지 관리 도구도 함께 설치된다. npm은 남이 만든 코드 묶음(패키지)을 내려받는 도구다.
+- Node.js·npm은 컴퓨터에 한 번만 설치하지만, React 같은 패키지는 프로젝트마다 따로 설치된다 → [[node_modules]]
 - 이런 프로그램을 **실행 환경**(런타임, Runtime)이라고 부른다.
 
 | | 브라우저 안의 JavaScript | Node.js 안의 JavaScript |
@@ -52,4 +53,5 @@ updated: 2026-11-01
 - [[개발 서버]]: Node.js로 실행되는 개발용 서버
 
 ## 나온 질문
+- [[2026-11-04 패키지는 프로젝트마다 설치하는지 컴퓨터에 한번 설치하면 계속 쓰는지]]
 - [[2026-11-01 npm run dev가 하는 일]]
