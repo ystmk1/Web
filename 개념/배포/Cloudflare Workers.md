@@ -20,7 +20,7 @@ updated: 2026-11-06
 | Workers | 서버 코드 실행만 | **Static Assets**로 사이트 파일까지 올림 → Pages가 하던 일 + 서버 코드 |
 
 - 그래서 Cloudflare 공식 가이드도 **새 프로젝트는 Workers로 시작**하라고 권한다.
-- 설정은 `wrangler.toml`(또는 `wrangler.jsonc`) 한 파일에 사이트 파일 폴더, API 코드, [[Cloudflare R2|R2]]·D1 같은 연결(바인딩)을 다 적고 `wrangler deploy`로 올린다. 깃허브에 푸시하면 자동 빌드되게(Workers Builds) 할 수도 있다.
+- 설정은 `wrangler.toml`(또는 `wrangler.jsonc`) 한 파일에 사이트 파일 폴더, API 코드, [[Cloudflare R2|R2]]·D1 같은 연결([[바인딩]])을 다 적고 `wrangler deploy`로 올린다. 깃허브에 푸시하면 자동 빌드되게(Workers Builds) 할 수도 있다.
 
 ## 왜 Workers를 권장하나
 1. **한 배포로 끝난다.** 사이트 화면과 API(예: 댓글 저장)를 프로젝트 두 개로 나눠 연결할 필요 없이, 하나의 Worker가 파일 요청엔 파일을, `/api/...` 요청엔 코드를 실행한다.
@@ -46,6 +46,8 @@ updated: 2026-11-06
 - [[Cloudflare R2]]: Worker에 바인딩해서 쓰는 파일 저장소
 - [[CDN]]: Cloudflare 전 세계 거점에서 파일이 배포되는 방식
 - [[빌드]]: 올리기 전에 결과물을 만드는 과정
+- [[바인딩]]: 설정 파일에 적어 키 없이 R2·D1을 붙이는 방식
 
 ## 나온 질문
 - [[2026-11-06 Cloudflare로 호스팅할 때 Pages보다 Workers를 권장하는 이유]]
+- [[2026-11-06 R2 키를 Vercel 환경 변수에 넣어야 하는 경우]]
